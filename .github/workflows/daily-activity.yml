@@ -2,8 +2,8 @@ name: Daily Activity Update
 
 on:
   schedule:
-    # Runs at 9 AM IST and 6 PM IST (03:30 & 12:30 UTC)
-    - cron: "30 3,12 * * *"
+    # Runs at 9 AM, 1 PM, 5 PM, 9 PM IST (03:30, 07:30, 11:30, 15:30 UTC)
+    - cron: "30 3,7,11,15 * * *"
   workflow_dispatch:
 
 permissions:
