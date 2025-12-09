@@ -1,9 +1,9 @@
-name: Daily Activity Update (IST 2 PM)
+name: Daily Activity Update (Test Every 5 Minutes)
 
-# Runs every day at 2:00 PM IST (08:30 UTC)
+# Temporary schedule for testing every 5 minutes
 on:
   schedule:
-    - cron: "30 8 * * *"
+    - cron: "*/5 * * * *"  # runs every 5 minutes
   workflow_dispatch:  # allows manual run
 
 permissions:
@@ -31,5 +31,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add activity_log.md
-          git commit -m "Daily activity update $(date -u +'%Y-%m-%d')" || echo "No changes to commit"
+          git commit -m "Daily activity update $(date -u +'%Y-%m-%d %H:%M:%SZ')" || echo "No changes to commit"
           git push
