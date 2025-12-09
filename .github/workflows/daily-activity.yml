@@ -1,10 +1,9 @@
 name: Daily Activity Update (Test Every 5 Minutes)
 
-# Temporary schedule for testing every 5 minutes
 on:
   schedule:
-    - cron: "*/5 * * * *"  # runs every 5 minutes
-  workflow_dispatch:  # allows manual run
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,9 +21,12 @@ jobs:
             echo "# Activity Log" > activity_log.md
           fi
 
-      - name: Append daily update
+      - name: Append daily update with unique marker
         run: |
-          echo "$(date -u +"%Y-%m-%d %H:%M:%SZ") - Daily note: learning/practice logged" >> activity_log.md
+          UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%SZ")
+          IST_TIME=$(TZ='Asia/Kolkata' date +"%Y-%m-%d %H:%M:%S %Z")
+          UNIQUE_ID=$(uuidgen)  # generates a unique ID each run
+          echo "$UTC_TIME | $IST_TIME - Daily note: learning/practice logged | ID: $UNIQUE_ID" >> activity_log.md
 
       - name: Commit & push changes
         run: |
