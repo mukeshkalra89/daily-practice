@@ -2,8 +2,7 @@ name: Daily Activity Update
 
 on:
   schedule:
-    # Runs at 9 AM, 1 PM, 5 PM, 9 PM IST (03:30, 07:30, 11:30, 15:30 UTC)
-    - cron: "30 3,7,11,15 * * *"
+    - cron: "30 3,7,11,15 * * *"   # 9AM,1PM,5PM,9PM IST
   workflow_dispatch:
 
 permissions:
@@ -15,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # important for consistent commits
 
       - name: Create log file if missing
         run: |
@@ -22,17 +23,21 @@ jobs:
             echo "# Activity Log" > activity_log.md
           fi
 
-      - name: Append daily update with unique marker
+      - name: Append daily update
         run: |
           UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%SZ")
           IST_TIME=$(TZ='Asia/Kolkata' date +"%Y-%m-%d %H:%M:%S %Z")
           UNIQUE_ID=$(uuidgen)
-          echo "$UTC_TIME | $IST_TIME - Daily note: learning/practice logged | ID: $UNIQUE_ID" >> activity_log.md
+          echo "$UTC_TIME | $IST_TIME - Daily note logged | ID: $UNIQUE_ID" >> activity_log.md
 
-      - name: Commit & push changes
+      - name: Add heartbeat file (ensures Git sees a change)
+        run: |
+          echo "$(date -u)" > heartbeat.txt
+
+      - name: Commit & Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add activity_log.md
-          git commit -m "Daily activity update $(date -u +'%Y-%m-%d %H:%M:%SZ')" || echo "No changes to commit"
+          git add .
+          git commit -m "Daily heartbeat $(date -u +'%Y-%m-%d %H:%M:%SZ')"
           git push
