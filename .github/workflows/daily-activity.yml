@@ -36,8 +36,8 @@ jobs:
 
       - name: Commit & Push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "mukeshkalra89"
+          git config user.email "mukeshkalra44@gmail.com"
           git add .
           git commit -m "Daily heartbeat $(date -u +'%Y-%m-%d %H:%M:%SZ')"
           git push
