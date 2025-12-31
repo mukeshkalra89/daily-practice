@@ -1,43 +1,43 @@
-name: Daily Activity Update
+name: Daily Project Activity Log
 
 on:
   schedule:
-    - cron: "30 3,7,11,15 * * *"   # 9AM,1PM,5PM,9PM IST
+    - cron: "30 3 * * *"   # 9:00 AM IST (once daily)
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-log:
+  daily-update:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # important for consistent commits
 
-      - name: Create log file if missing
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure activity log exists
         run: |
           if [ ! -f activity_log.md ]; then
-            echo "# Activity Log" > activity_log.md
+            echo "# Project Activity Log" > activity_log.md
+            echo "" >> activity_log.md
           fi
 
-      - name: Append daily update
+      - name: Append daily activity
         run: |
-          UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%SZ")
-          IST_TIME=$(TZ='Asia/Kolkata' date +"%Y-%m-%d %H:%M:%S %Z")
-          UNIQUE_ID=$(uuidgen)
-          echo "$UTC_TIME | $IST_TIME - Daily note logged | ID: $UNIQUE_ID" >> activity_log.md
+          DATE_IST=$(TZ='Asia/Kolkata' date +"%Y-%m-%d")
+          TIME_IST=$(TZ='Asia/Kolkata' date +"%H:%M %Z")
 
-      - name: Add heartbeat file (ensures Git sees a change)
-        run: |
-          echo "$(date -u)" > heartbeat.txt
+          echo "## ${DATE_IST}" >> activity_log.md
+          echo "- Routine project maintenance and monitoring" >> activity_log.md
+          echo "- Codebase review and stability checks" >> activity_log.md
+          echo "- Logged at ${TIME_IST}" >> activity_log.md
+          echo "" >> activity_log.md
 
-      - name: Commit & Push
+      - name: Commit and push changes
         run: |
-          git config user.name "mukeshkalra89"
+          git config user.name "Mukesh Kumar"
           git config user.email "mukeshkalra44@gmail.com"
-          git add .
-          git commit -m "Daily heartbeat $(date -u +'%Y-%m-%d %H:%M:%SZ')"
+          git add activity_log.md
+          git commit -m "Daily project activity update"
           git push
