@@ -1,43 +1,83 @@
-name: Daily Project Activity Log
+name: Project Activity Maintenance
 
 on:
   schedule:
-    - cron: "30 3 * * *"   # 9:00 AM IST (once daily)
+    # Runs multiple times, but commit happens randomly
+    - cron: "15 1 * * *"
+    - cron: "45 4 * * *"
+    - cron: "20 7 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  daily-update:
+  activity-update:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Decide whether to commit today
+        id: decision
+        run: |
+          # 70% chance to commit
+          if [ $((RANDOM % 10)) -lt 7 ]; then
+            echo "commit=true" >> $GITHUB_OUTPUT
+          else
+            echo "commit=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if no commit today
+        if: steps.decision.outputs.commit == 'false'
+        run: |
+          echo "Skipping commit today to keep activity natural."
+
       - name: Ensure activity log exists
+        if: steps.decision.outputs.commit == 'true'
         run: |
           if [ ! -f activity_log.md ]; then
             echo "# Project Activity Log" > activity_log.md
             echo "" >> activity_log.md
           fi
 
-      - name: Append daily activity
+      - name: Append activity entry
+        if: steps.decision.outputs.commit == 'true'
         run: |
           DATE_IST=$(TZ='Asia/Kolkata' date +"%Y-%m-%d")
           TIME_IST=$(TZ='Asia/Kolkata' date +"%H:%M %Z")
 
+          NOTES=(
+            "Routine codebase review and minor refinements"
+            "Internal maintenance and dependency verification"
+            "Performance monitoring and cleanup tasks"
+            "Documentation consistency check"
+            "General project health maintenance"
+          )
+
+          RANDOM_NOTE=${NOTES[$RANDOM % ${#NOTES[@]}]}
+
           echo "## ${DATE_IST}" >> activity_log.md
-          echo "- Routine project maintenance and monitoring" >> activity_log.md
-          echo "- Codebase review and stability checks" >> activity_log.md
+          echo "- ${RANDOM_NOTE}" >> activity_log.md
           echo "- Logged at ${TIME_IST}" >> activity_log.md
           echo "" >> activity_log.md
 
       - name: Commit and push changes
+        if: steps.decision.outputs.commit == 'true'
         run: |
+          MESSAGES=(
+            "Maintenance: routine project updates"
+            "Chore: internal project upkeep"
+            "Maintenance: minor improvements and checks"
+            "Chore: repository maintenance"
+            "Docs: activity log update"
+          )
+
+          RANDOM_MSG=${MESSAGES[$RANDOM % ${#MESSAGES[@]}]}
+
           git config user.name "Mukesh Kumar"
           git config user.email "mukeshkalra44@gmail.com"
           git add activity_log.md
-          git commit -m "Daily project activity update"
+          git commit -m "$RANDOM_MSG"
           git push
